@@ -104,8 +104,8 @@ function readPrimeFile($filename) {
                 foreach ($numbers as $number) {
                     if (is_numeric($number)) {
                         $number = (int)$number;
-                        $strNumber = (string)$number;
-                        if ($strNumber[0] === $strNumber[strlen($strNumber) - 1]) {
+                        $str_number = (string)$number;
+                        if ($str_number[0] == $str_number[strlen($str_number) - 1]) {
                             $primes[] = $number;
                         }
                     }
@@ -191,11 +191,23 @@ function solve() {
 
 function main() {
 
+    $start_time = microtime(true);
+    $start_memory = memory_get_usage();
+
     mergeRanges();
 
     loadFiles();
 
     solve();
+
+    $end_time = microtime(true);
+    $end_memory = memory_get_usage();
+
+    $executionTime = $end_time - $start_time;
+    $memory_usage = $end_memory - $start_memory;
+
+    echo "\nExecution Time: " . $executionTime . " seconds";
+    echo "\nMemory Usage: " . ($memory_usage / 1024) . " KB";
 
 }
 
