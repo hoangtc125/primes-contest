@@ -75,14 +75,6 @@ function binarySearchCache($x) {
 function mergeRanges() {
     global $inputs;
 
-    foreach ($inputs as $key => &$range) {
-        if ($range[1] - $range[0] < 2) {
-            unset($inputs[$key]);
-        } else {
-            $range[0] += 1;
-        }
-    }
-
     usort($inputs, function($a, $b) {
         return $a[0] - $b[0];
     });
@@ -105,8 +97,21 @@ function readPrimeFile($filename) {
     $file = fopen($filename, 'r');
     
     if ($file) {
-        $line = fgets($file);
-        $primes = preg_split('/\s+/', trim($line));
+        while (($line = fgets($file)) !== false) {
+            // Skip lines that do not contain prime numbers
+            if (preg_match('/^\s*\d/', $line)) {
+                $numbers = preg_split('/\s+/', trim($line));
+                foreach ($numbers as $number) {
+                    if (is_numeric($number)) {
+                        $number = (int)$number;
+                        $str_number = (string)$number;
+                        if ($str_number[0] == $str_number[strlen($str_number) - 1]) {
+                            $primes[] = $number;
+                        }
+                    }
+                }
+            }
+        }
         fclose($file);
     } else {
         echo "Error opening file: $filename\n";
@@ -147,7 +152,7 @@ function loadFiles() {
     $files =  array_unique($files);
     
     foreach ($files as $file) {
-        $primes = readPrimeFile("data/primes$file.txt");
+        $primes = readPrimeFile("primes/primes$file.txt");
         $data = array_merge($data, $primes);
     }
 
@@ -184,16 +189,10 @@ function solve() {
 }
 
 
-function stats($callback) {
-    $start = microtime(true);
-    call_user_func($callback);
-    $end = microtime(true);
-    $time = $end - $start;
-    echo "\nTime: $time\n";
-}
-
-
 function main() {
+
+    $start_time = microtime(true);
+    $start_memory = memory_get_usage();
 
     mergeRanges();
 
@@ -201,10 +200,19 @@ function main() {
 
     solve();
 
+    $end_time = microtime(true);
+    $end_memory = memory_get_usage();
+
+    $executionTime = $end_time - $start_time;
+    $memory_usage = $end_memory - $start_memory;
+
+    echo "\nExecution Time: " . $executionTime . " seconds";
+    echo "\nMemory Usage: " . ($memory_usage / 1024) . " KB";
+
 }
 
 
-stats("main");
+main();
 
 
 ?>
