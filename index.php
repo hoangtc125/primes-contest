@@ -99,7 +99,7 @@ function readPrimeFile($filename) {
     
     if ($file) {
         $line = fgets($file);
-        $primes = preg_split('/\s+/', trim($line));
+        $primes = explode(' ', trim($line));
         fclose($file);
     } else {
         echo "Error opening file: $filename\n";
@@ -177,7 +177,7 @@ function solve() {
 
     $outputs .= "\nTotal: $total";
 
-    print_r($outputs);
+    echo $outputs;
 }
 
 
