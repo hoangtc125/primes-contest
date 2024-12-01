@@ -32,56 +32,49 @@ $max_primes = [
     797003413, 817504243, 838041641, 858599503, 879190747, 899809343, 920419813, 941083981, 961748927, 982451653
 ];
 
+
 $data = [];
 $count = 0;
 
-function binarySearch($arr, $x) {
+
+function binarySearchCeil($x) {
+    global $data;
+    global $count;
+
     $low = 0;
-    $high = count($arr) - 1;
+    $high = $count - 1;
     while ($low <= $high) {
         $mid = floor(($low + $high) / 2);
-        if ($arr[$mid] < $x) {
+        if ($data[$mid] <= $x) {
             $low = $mid + 1;
-        } elseif ($arr[$mid] > $x) {
-            $high = $mid - 1;
         } else {
-            return $mid;
+            $high = $mid - 1;
         }
     }
     return $low;
 }
 
 
-function binarySearchCache($x) {
+function binarySearchFloor($x) {
     global $data;
     global $count;
-    
+
     $low = 0;
     $high = $count - 1;
     while ($low <= $high) {
         $mid = floor(($low + $high) / 2);
         if ($data[$mid] < $x) {
             $low = $mid + 1;
-        } elseif ($data[$mid] > $x) {
-            $high = $mid - 1;
         } else {
-            return $mid;
+            $high = $mid - 1;
         }
     }
-    return $low;
+    return $high;
 }
 
 
 function mergeRanges() {
     global $inputs;
-
-    foreach ($inputs as $key => &$range) {
-        if ($range[1] - $range[0] < 2) {
-            unset($inputs[$key]);
-        } else {
-            $range[0] += 1;
-        }
-    }
 
     usort($inputs, function($a, $b) {
         return $a[0] - $b[0];
@@ -168,10 +161,10 @@ function solve() {
         $start = $input[0];
         $end = $input[1];
 
-        $start_index = binarySearchCache($start);
-        $end_index = binarySearchCache($end);
+        $start_index = binarySearchCeil($start);
+        $end_index = binarySearchFloor($end);
 
-        $primes = array_slice($data, $start_index, $end_index - $start_index);
+        $primes = array_slice($data, $start_index, $end_index - $start_index + 1);
 
         $total += count($primes);
 
