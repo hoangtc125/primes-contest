@@ -162,6 +162,8 @@ function solve() {
     $total = 0;
     $count_inputs = count($inputs);
 
+    $outputs = "";
+
     foreach ($inputs as $index => $input) {
         $start = $input[0];
         $end = $input[1];
@@ -173,14 +175,16 @@ function solve() {
 
         $total += count($primes);
 
-        print_r(implode(" ", $primes));
+        $outputs .= implode(" ", $primes);
 
         if ($index < $count_inputs - 1) {
-            print_r(" ");
+            $outputs .= " ";
         }
     }
 
-    print_r("\nTotal: $total");
+    $outputs .= "\nTotal: $total";
+
+    print_r($outputs);
 }
 
 
