@@ -75,6 +75,14 @@ function binarySearchCache($x) {
 function mergeRanges() {
     global $inputs;
 
+    foreach ($inputs as $key => &$range) {
+        if ($range[1] - $range[0] < 2) {
+            unset($inputs[$key]);
+        } else {
+            $range[0] += 1;
+        }
+    }
+
     usort($inputs, function($a, $b) {
         return $a[0] - $b[0];
     });
