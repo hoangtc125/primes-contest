@@ -48,6 +48,11 @@ function mergeRanges() {
         }
     }
 
+    for ($i = 0; $i < count($merged); $i++) {
+        $merged[$i][0] += 1;
+        $merged[$i][1] -= 1;
+    }
+    
     $split_merged = [];
     
     for ($i = 0; $i < count($merged); $i++) {
@@ -55,6 +60,10 @@ function mergeRanges() {
         $start = $range[0];
         $end = $range[1];
         $total_numbers = $end - $start + 1;
+
+        if ($total_numbers < 1) {
+            continue;
+        }
         
         if ($total_numbers > $gap) {
             $current_start = $start;
@@ -77,6 +86,10 @@ function mergeRanges() {
 function sieve() {
     global $inputs;
     global $primes;
+
+    if (!count($inputs)) {
+        return;
+    }
 
     $limit = floor(sqrt($inputs[count($inputs) - 1][1])) + 1;
     $sieve = array_fill(0, $limit + 1, true);
@@ -128,7 +141,11 @@ function segmentedSieve($low, $high, &$total) {
     }
 
     $_low = $low;
-    if ($low % 2 == 0) {
+    if ($low == 2) {
+        $results[] = 2;
+        $total++;
+        $_low = 3;
+    } else if ($low % 2 == 0) {
         $_low++;
     }
     
