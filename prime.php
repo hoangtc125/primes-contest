@@ -28,10 +28,12 @@ $inputs = [
 
 $primes = [];
 $results = [];
+$gap = 100000;
 
 
 function mergeRanges() {
     global $inputs;
+    global $gap;
 
     usort($inputs, function($a, $b) {
         return $a[0] - $b[0];
@@ -46,29 +48,27 @@ function mergeRanges() {
         }
     }
 
-    $splitMerged = [];
+    $split_merged = [];
     
     for ($i = 0; $i < count($merged); $i++) {
         $range = $merged[$i];
         $start = $range[0];
         $end = $range[1];
-        $totalNumbers = $end - $start + 1;
+        $total_numbers = $end - $start + 1;
         
-        if ($totalNumbers > 100000) {
-            $numSplits = ceil($totalNumbers / 100000);
-            $splitSize = ceil($totalNumbers / $numSplits);
-            
-            for ($j = 0; $j < $numSplits; $j++) {
-                $subStart = $start + ($j * $splitSize);
-                $subEnd = min($subStart + $splitSize - 1, $end);
-                $splitMerged[] = [$subStart, $subEnd];
+        if ($total_numbers > $gap) {
+            $current_start = $start;
+            while ($current_start <= $end) {
+                $current_end = min(floor($current_start / $gap) * $gap + $gap - 1, $end);
+                $split_merged[] = [$current_start, $current_end];
+                $current_start = $current_end + 1;
             }
         } else {
-            $splitMerged[] = $range;
+            $split_merged[] = $range;
         }
     }
 
-    $merged = $splitMerged;
+    $merged = $split_merged;
 
     $inputs = $merged;
 }
@@ -94,78 +94,24 @@ function sieve() {
 }
 
 
-function segmentedSieve($low, $high, &$total) {
-    global $primes;
-    global $results;
-
-    $limit = floor(sqrt($high)) + 1;
-    $n = $high - $low + 1;
-    $mark = array_fill(0, $n, true);
-
-    for ($i = 2; $i <= $limit; $i++) {
-        if ($primes[$i]) {
-            $low_lim = max($i * $i, $low + ($i - $low % $i) % $i);
-            for ($j = $low_lim; $j <= $high; $j += $i) {
-                $mark[$j - $low] = false;
-            }
-        }
-    }
-
-    $_low = $low;
-    if ($low < 11) {
-        $results[] = 2;
-        $results[] = 3;
-        $results[] = 5;
-        $results[] = 7;
-        $total += 4;
-
-        $_low = 11;
-    }
-
-    $step = 1;
-    for ($i = $_low; $i <= $high; $i += $step) {
-        $last = $i % 10;
-        $first = floor($i / 10 ** (strlen($i) - 1));
-        if (in_array($first, [1, 3, 7, 9])) {
-            if ($first < $last) {
-                $step = 10 + $first - $last;
-            } else if ($first > $last) {
-                $step = $first - $last;
-            } else {
-                if ($first == 9) {
-                    if (strlen($i + 10) > strlen($i)) {
-                        $step = 2;
-                    } else {
-                        $step = 10;
-                    }
-                } else {
-                    $step = 10;
-                }
-            }
-
-            if ($mark[$i - $low]) {
-                $results[] = $i;
-                $total++;
-
-            }
-        } else {
-            $low_lim = ($first + 1) * 10 ** (strlen($i) - 1);
-            $step = $low_lim - $i;
-        }
-    }
-
-}
-
-
 function hasSameFirstLastDigit($n) {
     $str = (string) $n;
     return $str[0] == $str[strlen($str) - 1];
 }
 
 
-function segmentedSieve2($low, $high, &$total) {
+function segmentedSieve($low, $high, &$total) {
     global $primes;
     global $results;
+    global $gap;
+
+    if ($low > $gap) {
+        $str_low = (string) $low;
+        $first_low = $str_low[0];
+        if (!in_array($first_low, ['1', '3', '7', '9'])) {
+            return;
+        }
+    }
 
     $limit = floor(sqrt($high)) + 1;
     $n = $high - $low + 1;
@@ -181,15 +127,20 @@ function segmentedSieve2($low, $high, &$total) {
         }
     }
 
-    for ($i = $low; $i <= $high; $i++) {
-        if ($mark[$i - $low]) {
-            $primes_idx[] = $i;
-        }
+    $_low = $low;
+    if ($low % 2 == 0) {
+        $_low++;
+    }
+    
+    $step = 2;
+    $step_after = 2;
+    if ($low >= $gap) {
+        $step_after = 10;
     }
 
-    $results = [];
-    foreach ($primes_idx as $i) {
-        if (hasSameFirstLastDigit($i)) {
+    for ($i = $_low; $i <= $high; $i += $step) {
+        if ($mark[$i - $low] && hasSameFirstLastDigit($i)) {
+            $step = $step_after;
             $results[] = $i;
             $total++;
         }
@@ -206,7 +157,7 @@ function solve() {
     
     foreach ($inputs as $range) {
         list($low, $high) = $range;
-        segmentedSieve2($low, $high, $total);
+        segmentedSieve($low, $high, $total);
     }
     
     echo implode(" ", $results) . "\n";
