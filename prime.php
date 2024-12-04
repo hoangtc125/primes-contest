@@ -41,7 +41,7 @@ function mergeRanges() {
 
     $merged = [];
     foreach ($inputs as $range) {
-        if (empty($merged) || $merged[count($merged) - 1][1] < $range[0]) {
+        if (empty($merged) || $merged[count($merged) - 1][1] - 1 < $range[0]) {
             $merged[] = $range;
         } else {
             $merged[count($merged) - 1][1] = max($merged[count($merged) - 1][1], $range[1]);
