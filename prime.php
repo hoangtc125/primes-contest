@@ -1,7 +1,6 @@
 <?php
 
-ini_set('memory_limit', '1G');
-
+// INPUT HERE
 $inputs = [
     [8 * (10 ** 7), 8 * (10 ** 7) + 448347],
     [10 ** 8 - 2 * 10 ** 7, 10 ** 8 - 1],
@@ -26,6 +25,10 @@ $inputs = [
 ];
 
 
+// START SOLVING
+ini_set('memory_limit', '1G');
+
+$origin_inputs = $inputs;
 $primes = [];
 $results = [];
 $gap = 100000;
@@ -166,9 +169,40 @@ function segmentedSieve($low, $high, &$total) {
 }
 
 
+function binarySearchStart($values, $start) {
+    $low = 0;
+    $high = count($values) - 1;
+    while ($low <= $high) {
+        $mid = floor(($low + $high) / 2);
+        if ($values[$mid] <= $start) {
+            $low = $mid + 1;
+        } else {
+            $high = $mid - 1;
+        }
+    }
+    return $low < count($values) ? $low : -1;
+}
+
+
+function binarySearchEnd($values, $end) {
+    $low = 0;
+    $high = count($values) - 1;
+    while ($low <= $high) {
+        $mid = floor(($low + $high) / 2);
+        if ($values[$mid] < $end) {
+            $low = $mid + 1;
+        } else {
+            $high = $mid - 1;
+        }
+    }
+    return $high >= 0 ? $high : -1;
+}
+
+
 function solve() {
     global $inputs;
     global $results;
+    global $origin_inputs;
 
     $total = 0;
     
@@ -176,9 +210,19 @@ function solve() {
         list($low, $high) = $range;
         segmentedSieve($low, $high, $total);
     }
+
+    foreach($origin_inputs as $range) {
+        $start = $range[0];
+        $end = $range[1];
+
+        $start_idx = binarySearchStart($results, $start);
+        $end_idx = binarySearchEnd($results, $end);
+
+        $sub_results = array_slice($results, $start_idx, $end_idx - $start_idx + 1);
+
+        print_r($sub_results);
+    }
     
-    echo implode(" ", $results) . "\n";
-    echo "Total: $total\n";
 }
 
 
@@ -195,6 +239,7 @@ function stats($callback) {
 
 function main() {
     global $primes;
+    global $origin_inputs;
 
     mergeRanges();
 
